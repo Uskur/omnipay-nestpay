@@ -42,7 +42,11 @@ class PostRequest extends AbstractRequest
             'lang' => $this->getLang(), // en, tr
             'taksit' => $this->getInstallment(),
             'hash' => '',
-            'refreshtime' => $this->getRefreshtime()
+            'refreshtime' => $this->getRefreshtime(),
+            'pan' => $this->getCard()->getNumber(),
+            'Ecom_Payment_Card_ExpDate_Year' => $this->getCard()->getExpiryDate('y'),
+            'Ecom_Payment_Card_ExpDate_Month' => $this->getCard()->getExpiryDate('m'),
+            'cv2' => $this->getCard()->getCvv()
         ];
         $plaintext = $data['clientid'] . $data['oid'] . $this->getAmount() . $data['okUrl'] . $data['failUrl'] . $data['islemtipi'] . $data['taksit'] . $data['rnd'] . $data['callbackurl'] . $this->getStoreKey();
         $data['hash'] = base64_encode(pack('H*', sha1($plaintext)));
