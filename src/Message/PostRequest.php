@@ -19,7 +19,7 @@ class PostRequest extends AbstractRequest
 
     protected $endpoints = [
         'test' => 'https://entegrasyon.asseco-see.com.tr/fim/est3Dgate',
-        'isbank' => 'https://sanalpos.isbank.com.tr/servlet/est3Dgate'
+        'isbank' => 'https://sanalpos.isbank.com.tr/fim/est3Dgate'
     ];
 
     public function getData()
@@ -29,7 +29,6 @@ class PostRequest extends AbstractRequest
             $this->getCard()->validate();
         }
         $data = [
-            //amount|BillToCompany|BillToName|callbackUrl|clientid|currency|failUrl|hashAlgorithm|Instalment|lang|okurl|refreshtime|rnd|storetype|TranType|storeKey
             'amount' => $this->getAmount(),
             'BillToCompany' => '',
             'BillToName' => mb_substr("{$this->getCard()->getFirstName()} {$this->getCard()->getLastName()}", 0, 255),
@@ -40,23 +39,21 @@ class PostRequest extends AbstractRequest
             'hashAlgorithm' => 'ver3',
             'Instalment' => $this->getInstallment(),
             'lang' => $this->getLang(), // en, tr
+            'oid' => $this->getTransactionId(),
             'okurl' => $this->getReturnUrl(),
             'refreshtime' => $this->getRefreshtime(),
             'rnd' => $this->getRnd(),
             'storetype' => $this->getStoreType(),
             'TranType' => $this->getType(),
+            'Email' => $this->getCard()->getEmail(),
         ];
+        ksort($data, SORT_NATURAL | SORT_FLAG_CASE);
         $plaintext = "";
         foreach($data as $key => $value) {
             $plaintext .= str_replace("|", "\\|", str_replace("\\", "\\\\", $value)) . "|";
         }
         $plaintext .= str_replace("|", "\\|", str_replace("\\", "\\\\", $this->getStoreKey()));
-        $data['hash'] = base64_encode(pack('H*', hash('sha512', $plaintext)));
-        $data['oid'] = $this->getTransactionId();
-        $data['Email'] = $this->getCard()->getEmail();
-        $data['tel'] = mb_substr($this->getCard()->getPhone(), 0, 32);
-        $data['Fadres'] = mb_substr($this->getCard()->getAddress1(), 0, 255);
-        $data['Fadres2'] = mb_substr($this->getCard()->getAddress2(), 0, 255);
+        $data['HASH'] = base64_encode(pack('H*', hash('sha512', $plaintext)));
 
         return $data;
     }
