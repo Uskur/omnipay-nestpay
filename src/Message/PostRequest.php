@@ -29,27 +29,32 @@ class PostRequest extends AbstractRequest
             $this->getCard()->validate();
         }
         $data = [
-            'clientid' => $this->getClientId(),
-            'storetype' => $this->getStoreType(),
-            'islemtipi' => $this->getType(),
+            //amount|BillToCompany|BillToName|callbackUrl|clientid|currency|failUrl|hashAlgorithm|Instalment|lang|okurl|refreshtime|rnd|storetype|TranType|storeKey
             'amount' => $this->getAmount(),
+            'BillToCompany' => '',
+            'BillToName' => mb_substr("{$this->getCard()->getFirstName()} {$this->getCard()->getLastName()}", 0, 255),
+            'callbackUrl' => $this->getNotifyUrl(),
+            'clientid' => $this->getClientId(),
             'currency' => $this->getCurrencyNumeric(),
-            'oid' => $this->getTransactionId(),
-            'okUrl' => $this->getReturnUrl(),
             'failUrl' => $this->getReturnUrl(),
-            'callbackurl' => $this->getNotifyUrl(),
-            'rnd' => $this->getRnd(),
+            'hashAlgorithm' => 'ver3',
+            'Instalment' => $this->getInstallment(),
             'lang' => $this->getLang(), // en, tr
-            'taksit' => $this->getInstallment(),
-            'hash' => '',
-            'refreshtime' => $this->getRefreshtime()
+            'okurl' => $this->getReturnUrl(),
+            'refreshtime' => $this->getRefreshtime(),
+            'rnd' => $this->getRnd(),
+            'storetype' => $this->getStoreType(),
+            'TranType' => $this->getType(),
         ];
-        $plaintext = $data['clientid'] . $data['oid'] . $this->getAmount() . $data['okUrl'] . $data['failUrl'] . $data['islemtipi'] . $data['taksit'] . $data['rnd'] . $data['callbackurl'] . $this->getStoreKey();
+        $plaintext = "";
+        foreach($data as $key => $value) {
+            $plaintext .= str_replace("|", "\\|", str_replace("\\", "\\\\", $value)) . "|";
+        }
+        $plaintext .= str_replace("|", "\\|", str_replace("\\", "\\\\", $this->getStoreKey()));
         $data['hash'] = base64_encode(pack('H*', hash('sha512', $plaintext)));
-
+        $data['oid'] = $this->getTransactionId();
         $data['Email'] = $this->getCard()->getEmail();
         $data['tel'] = mb_substr($this->getCard()->getPhone(), 0, 32);
-        $data['Faturafirma'] = mb_substr("{$this->getCard()->getFirstName()} {$this->getCard()->getLastName()}", 0, 255);
         $data['Fadres'] = mb_substr($this->getCard()->getAddress1(), 0, 255);
         $data['Fadres2'] = mb_substr($this->getCard()->getAddress2(), 0, 255);
 
