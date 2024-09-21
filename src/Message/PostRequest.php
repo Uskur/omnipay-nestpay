@@ -10,7 +10,7 @@ use Omnipay\NestPay\ThreeDPayHostingGateway;
  * NestPay 3D Pay Hosting Post Request
  *
  * @author Burak USGURLU <burak@uskur.com.tr>
- *        
+ *
  */
 class PostRequest extends AbstractRequest
 {
@@ -45,14 +45,14 @@ class PostRequest extends AbstractRequest
             'refreshtime' => $this->getRefreshtime()
         ];
         $plaintext = $data['clientid'] . $data['oid'] . $this->getAmount() . $data['okUrl'] . $data['failUrl'] . $data['islemtipi'] . $data['taksit'] . $data['rnd'] . $data['callbackurl'] . $this->getStoreKey();
-        $data['hash'] = base64_encode(pack('H*', sha1($plaintext)));
-        
+        $data['hash'] = base64_encode(pack('H*', hash('sha512', $plaintext)));
+
         $data['Email'] = $this->getCard()->getEmail();
         $data['tel'] = mb_substr($this->getCard()->getPhone(), 0, 32);
         $data['Faturafirma'] = mb_substr("{$this->getCard()->getFirstName()} {$this->getCard()->getLastName()}", 0, 255);
         $data['Fadres'] = mb_substr($this->getCard()->getAddress1(), 0, 255);
         $data['Fadres2'] = mb_substr($this->getCard()->getAddress2(), 0, 255);
-        
+
         return $data;
     }
 
