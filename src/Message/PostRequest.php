@@ -47,7 +47,6 @@ class PostRequest extends AbstractRequest
             'storetype' => $this->getStoreType(),
             'TranType' => $this->getType(),
             'Email' => $this->getCard()->getEmail(),
-            'refreshTime' => 10,
         ];
         ksort($data, SORT_NATURAL | SORT_FLAG_CASE);
         $plaintext = "";
