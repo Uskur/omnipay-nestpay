@@ -19,7 +19,7 @@ class PostRequest extends AbstractRequest
 
     protected $endpoints = [
         'test' => 'https://entegrasyon.asseco-see.com.tr/fim/est3Dgate',
-        'isbank' => 'https://sanalpos.isbank.com.tr/fim/est3Dgate'
+        'isbank' => 'https://sanalpos.isbank.com.tr/fim/est3Dgate',
     ];
 
     public function getData()
@@ -35,6 +35,7 @@ class PostRequest extends AbstractRequest
             'callbackUrl' => $this->getNotifyUrl(),
             'clientid' => $this->getClientId(),
             'currency' => $this->getCurrencyNumeric(),
+            'encoding' => 'utf-8',
             'failUrl' => $this->getReturnUrl(),
             'hashAlgorithm' => 'ver3',
             'Instalment' => $this->getInstallment(),
@@ -49,8 +50,10 @@ class PostRequest extends AbstractRequest
         ];
         ksort($data, SORT_NATURAL | SORT_FLAG_CASE);
         $plaintext = "";
-        foreach($data as $key => $value) {
-            $plaintext .= str_replace("|", "\\|", str_replace("\\", "\\\\", $value)) . "|";
+        foreach ($data as $key => $value) {
+            if ($key != "hash" && $key != "encoding") {
+                $plaintext .= str_replace("|", "\\|", str_replace("\\", "\\\\", $value)) . "|";
+            }
         }
         $plaintext .= str_replace("|", "\\|", str_replace("\\", "\\\\", $this->getStoreKey()));
         $data['HASH'] = base64_encode(pack('H*', hash('sha512', $plaintext)));
